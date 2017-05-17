@@ -1,0 +1,62 @@
+<html>
+
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <title>QZ Tray Sample Page</title>
+</head>
+
+<!-- Required scripts -->
+<script type="text/javascript" src="js/dependencies/rsvp-3.1.0.min.js"></script>
+<script type="text/javascript" src="js/dependencies/sha-256.min.js"></script>
+<script type="text/javascript" src="js/qz-tray.js"></script>
+
+<body id="qz-page" role="document">
+    <input id="printerName" type="text" value="XPS" />
+    <button onclick="printHTML()">Print</button>
+</body>
+<script>
+    var config = null;
+    /// Pixel Printers ///
+    function printHTML() {
+        let printerName = document.getElementById("printerName");
+
+        if (qz.websocket.isActive()) {
+            printData();
+        }
+        else {
+            qz.websocket.connect().then(function () {
+                return qz.printers.find(printerName.value);               // Pass the printer name into the next Promise
+            }).then(function (printer) {
+                config = qz.configs.create(printer);       // Create a default config for the found printer
+                return printData();
+            }).catch(e => {
+                console.log(e);
+            });
+        }
+    }
+
+    function printData() {
+
+        var colA = '<h2>*&nbsp; QZ Print POC*</h2>' +
+            '<span style="color: #F00;">Company:</span> ABC <br/>' +
+            '<span style="color: #F00;">Tested by:</span>Karthik';
+
+        var printData = [
+            {
+                type: 'html',
+                format: 'plain',
+                data: '<html>' +
+                '   <table style="font-family: monospace; border: 1px;">' +
+                '       <tr style="height: 6cm;">' +
+                '           <td valign="top">' + colA + '</td>' +
+                '       </tr>' +
+                '   </table>' +
+                '</html>'
+            }
+        ];
+        return qz.print(config, printData);
+    }
+
+</script>
+
+</html>
